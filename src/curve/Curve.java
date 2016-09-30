@@ -84,6 +84,9 @@ public class Curve {
     }
     
     public void addControlPoint(int x, int y){
+        for(ControlPoint point : controlPoints){
+            point.setSelected(false);
+        }
         controlPoints.add(new ControlPoint(x*2, y*2));
     }
     
@@ -187,7 +190,7 @@ public class Curve {
         }
         ControlPoint[] points1 = new ControlPoint[controlPoints.size()];
         for(int i = 0; i < points1.length; i++){
-            points1[i] = new ControlPoint(Math.round((float) xCoords1[i]), Math.round((float) yCoords1[i]), zCoords1[i]);
+            points1[i] = new ControlPoint(Math.round((float) xCoords1[i]), Math.round((float) yCoords1[i]), zCoords1[i], false);
         }
         curves[0] = new Curve(points1, false);
         
@@ -217,7 +220,7 @@ public class Curve {
         }
         ControlPoint[] points2 = new ControlPoint[controlPoints.size()];
         for(int i = 0; i < points2.length; i++){
-            points2[i] = new ControlPoint(Math.round((float) xCoords2[i]), Math.round((float) yCoords2[i]), zCoords2[i]);
+            points2[i] = new ControlPoint(Math.round((float) xCoords2[i]), Math.round((float) yCoords2[i]), zCoords2[i], false);
         }
         curves[1] = new Curve(points2, false);
         return curves;
