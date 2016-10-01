@@ -3,6 +3,7 @@ package curve;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.concurrent.CopyOnWriteArrayList;
+import util.MathUtil;
 
 /**
  *
@@ -84,11 +85,51 @@ public class Curve {
     }
     
     public void addControlPoint(int x, int y){
-        controlPoints.add(new ControlPoint(x*2, y*2));
+        x *= 2;
+        y *= 2;
+        for(int i = 0; i < controlPoints.size(); i++){
+            ControlPoint point = controlPoints.get(i);
+            if(point.isSelected()){
+                point.setSelected(false);
+                if(i==0){
+                    try{
+                        double distanceFromPoint = MathUtil.getDistSq(point.getX(), point.getY(), controlPoints.get(i+1).getX(), controlPoints.get(i+1).getY());
+                        double distanceFromMouse = MathUtil.getDistSq(x, y, controlPoints.get(i+1).getX(), controlPoints.get(i+1).getX());
+                        if(distanceFromMouse > distanceFromPoint){
+                            controlPoints.add(i, new ControlPoint(x, y));
+                        }else{
+                            controlPoints.add(i+1, new ControlPoint(x, y));
+                        }
+                    }catch(ArrayIndexOutOfBoundsException e){
+                        controlPoints.add(new ControlPoint(x, y));
+                    }
+                }else if(i == controlPoints.size() - 1){
+                    double distanceFromPoint = MathUtil.getDistSq(point.getX(), point.getY(), controlPoints.get(i-1).getX(), controlPoints.get(i-1).getY());
+                    double distanceFromMouse = MathUtil.getDistSq(x, y, controlPoints.get(i-1).getX(), controlPoints.get(i-1).getY());
+                    if(distanceFromMouse > distanceFromPoint){
+                        controlPoints.add(i+1, new ControlPoint(x, y));
+                    }else{
+                        controlPoints.add(i, new ControlPoint(x, y));
+                    }
+                }else{
+                    double distanceFromPoint = MathUtil.getDistSq(x, y, controlPoints.get(i-1).getX(), controlPoints.get(i-1).getY());
+                    double distanceFromOtherPoint = MathUtil.getDistSq(x, y, controlPoints.get(i+1).getX(), controlPoints.get(i+1).getY());
+                    if(distanceFromOtherPoint > distanceFromPoint){
+                        controlPoints.add(i, new ControlPoint(x, y));
+                    }else{
+                        controlPoints.add(i+1, new ControlPoint(x, y));
+                    }
+                }
+                break;
+            }
+        }
     }
     
     public void removeControlPoint(ControlPoint point){
         controlPoints.remove(point);
+        if(point.isSelected()){
+            controlPoints.get(controlPoints.size()-1).setSelected(true);
+        }
     }
     
     private double interpolate(double percentage, double... coords){
@@ -187,7 +228,7 @@ public class Curve {
         }
         ControlPoint[] points1 = new ControlPoint[controlPoints.size()];
         for(int i = 0; i < points1.length; i++){
-            points1[i] = new ControlPoint(Math.round((float) xCoords1[i]), Math.round((float) yCoords1[i]), zCoords1[i]);
+            points1[i] = new ControlPoint(Math.round((float) xCoords1[i]), Math.round((float) yCoords1[i]), zCoords1[i], false);
         }
         curves[0] = new Curve(points1, false);
         
@@ -217,7 +258,7 @@ public class Curve {
         }
         ControlPoint[] points2 = new ControlPoint[controlPoints.size()];
         for(int i = 0; i < points2.length; i++){
-            points2[i] = new ControlPoint(Math.round((float) xCoords2[i]), Math.round((float) yCoords2[i]), zCoords2[i]);
+            points2[i] = new ControlPoint(Math.round((float) xCoords2[i]), Math.round((float) yCoords2[i]), zCoords2[i], false);
         }
         curves[1] = new Curve(points2, false);
         return curves;

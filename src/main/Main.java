@@ -241,7 +241,7 @@ public class Main extends javax.swing.JFrame implements ActionListener{
     private void canvasMouseDragged(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_canvasMouseDragged
         for(Curve curve : curves){
             for(ControlPoint point : curve.getControlPoints()){
-                if(point.isSelected()){
+                if(point.isHeld()){
                     int dx = evt.getX() - dragStart.x;
                     int dy = evt.getY() - dragStart.y;
                     dragStart = evt.getPoint();
@@ -289,10 +289,14 @@ public class Main extends javax.swing.JFrame implements ActionListener{
                 for(Curve curve : curves){
                     boolean selected = false;
                     for(ControlPoint point : curve.getControlPoints()){
-                        if(point.isHovered()){
+                        if(!evt.isConsumed() && point.isHovered()){
                             tSlider.setValue((int)(curve.getT() * 200));
                             animateCheckBox.setSelected(curve.isAnimated());
                             selected = true;
+                            point.setSelected(true);
+                            evt.consume();
+                        }else{
+                            point.setSelected(false);
                         }
                     }
                     curve.setSelected(selected);
